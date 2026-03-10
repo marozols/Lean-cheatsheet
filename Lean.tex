@@ -1,0 +1,1053 @@
+% !TEX program = xelatex
+
+% In OSS Code untick
+% Latex-workshop › Latex › Build: Force Recipe Usage
+% for the magic comment above to work.
+
+\documentclass[a4paper]{article}
+
+% Unicode suport 
+\usepackage[utf8]{inputenc} 
+\usepackage{fontspec}
+\setmonofont{DejaVu Sans Mono} % For monospace sections
+
+
+% Page margins
+\usepackage{fullpage}
+
+% AMS
+\usepackage{amssymb}
+
+% Not eat space
+\usepackage{xspace}
+
+% Hyperref
+\usepackage[colorlinks = true, linkcolor = blue]{hyperref}
+
+% Macro for creating other macros
+\NewDocumentCommand{\CreateMacro}{om}{%
+        \expandafter\newcommand\csname \IfNoValueTF{#1}{#2}{#1}\endcsname{\hyperref[lean:\IfNoValueTF{#1}{#2}{#1}]{\texttt{#2}}\xspace}%
+}
+\NewDocumentCommand{\CreateTitle}{om}{%
+    \paragraph{\expandafter\csname \IfNoValueTF{#1}{#2}{#1}\endcsname\label{lean:\IfNoValueTF{#1}{#2}{#1}}}
+}
+% Starts a "paragraph" that explains a given Lean command
+\NewDocumentCommand{\LeanCommand}{om}{%
+    \IfNoValueTF{#1}{%
+        \CreateMacro{#2}
+        \CreateTitle{#2}
+    }{%
+        \CreateMacro[#1]{#2}
+        \CreateTitle[#1]{#2}
+    }%
+}
+
+% \NewDocumentCommand{\MatC}{o m}{%
+%     \MatF{\C}[#1]{#2}
+% }
+
+\CreateMacro{apply}
+
+\newcommand{\False}{\texttt{False}}
+\newcommand{\True}{\texttt{True}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+\title{Lean cheat sheet}
+\author{Maris Ozols}
+\maketitle
+\tableofcontents
+\newpage
+
+%%%%%%%%%%%%%%%
+\section{Logic}
+%%%%%%%%%%%%%%%
+
+% %----------------%
+% \subsection{Logic}
+% %----------------%
+
+\subsection*{Notation}
+
+For a complete list of notation, click on the $\forall$ icon in ``Lean Infoview'', select ``Documentation\dots'' and then ``Docs: Show Unicode Input Abbreviations''.
+
+\vspace{10pt}
+
+% \begin{center}
+\begin{tabular}{lcl}
+    Implication & $\to$ & \verb|\r|, \verb|\to|, \verb|\imp| \\
+    Left arrow & $\gets$ & \verb|\l|, \verb|\gets| \\
+    Equivalence & $\leftrightarrow$ & \verb|\iff|, \verb|\leftrightarrow|, \verb|\lr|, \verb|\<->| \\
+    Logical AND & $\wedge$ & \verb|\and|, \verb|\wedge| \\
+    Logical OR & $\vee$ & \verb|\or|, \verb|\v|, \verb|\vee| \\
+    Negation & $\neg$ & \verb|\n|, \verb|\not| \\
+    Universal quantifier & $\forall$ & \verb|\all|, \verb|\forall| \\
+    Existential quantifier & $\exists$ & \verb|\ex|, \verb|\exists| \\
+    Not equal & $\neq$ & \verb|\neq|, \verb|\ne| \\
+    Turnstile & $\vdash$ & \verb|\vdash|, \verb:\|-:, \verb|\goal|
+\end{tabular}
+% \end{center}
+
+% \begin{itemize}
+%     \item Implication: $\to$ is \verb|\r|, \verb|\to| or \verb|\imp|
+%     \item Left arrow: $\gets$ is \verb|\l| or \verb|\gets|
+%     \item Equivalence: $\leftrightarrow$ is \verb|\iff|, \verb|\leftrightarrow|, \verb|\lr|, or \verb|\<->|
+%     \item Logical AND: $\wedge$ is \verb|\and| or \verb|\wedge|
+%     \item Logical OR: $\vee$ is \verb|\or|, \verb|\v| or \verb|\vee|
+%     \item Negation: $\neg$ is \verb|\n| or \verb|\not|
+%     \item Universal quantifier: $\forall$ is \verb|\all| or \verb|\forall|
+%     \item Existential quantifier: $\exists$ is \verb|\ex| or \verb|\exists|
+%     \item Not equal: $\neq$ is \verb|\neq| or \verb|\ne|
+%     \item Turnstile: $\vdash$ is \verb|\vdash|, \verb:\|-: or \verb|\goal|
+% \end{itemize}
+
+\subsection*{Conventions}
+
+\begin{itemize}
+    \item $A \to B \to C$ means $A \to (B \to C)$
+    \item $\neg A$ means $A \to \False$
+    \item $x \neq y$ means $(x = y) \to \False$
+    \item $\forall x < 42,\ P\ x$ is a shorthand for $\forall x,\ x < 42 \to P\ x$
+\end{itemize}
+
+\subsection*{Accessors}
+
+\begin{itemize}
+    \item \href{https://en.wikipedia.org/wiki/Modus_ponens}{Modus ponens}: \texttt{$h$.mp} and \texttt{$h$.mpr} turn a hypothesis $h : p \leftrightarrow q$ into $p \to q$ and $q \to p$, respectively.
+    \item \href{https://en.wikipedia.org/wiki/Modus_tollens}{Modus tollens}: \texttt{$h$.mt} turns a hypothesis $h : p \to q$ into $\neg q \to \neg p$.
+    \item Left and right injection into \texttt{Or}:
+    \begin{itemize}
+        \item \texttt{Or.inl $hl$} proves $hl \vee hr$ using $hl$,
+        \item \texttt{Or.inr $hr$} proves $hl \vee hr$ using $hr$.
+    \end{itemize}
+\end{itemize}
+
+\subsection*{Tactics}
+
+% \newcommand{\tabs}[2]{%
+%   \parindent0pt
+%   \hangindent2cm
+%   \makebox[2cm][l]{#1}#2\par
+%   \vspace{4pt}
+% }
+
+% \tabs{Item A}{This is a long description that will wrap onto multiple
+% lines, and every wrapped line starts at 2cm from the left margin.}
+
+% \tabs{Item B}{Another long description, also wrapped with the same
+% indentation behavior. Another long description, also wrapped with the same
+% indentation behavior. Another long description, also wrapped with the same
+% indentation behavior.}
+
+% \tabs{Item C}{This is a long description that will wrap onto multiple
+% lines, and every wrapped line starts at 2cm from the left margin.}
+
+
+\LeanCommand[lleft]{left}
+
+\begin{itemize}
+    \item Reduces $\vdash a \vee b$ to $\vdash a$.
+\end{itemize}
+
+\LeanCommand[rright]{right}
+
+\begin{itemize}
+    \item Reduces $\vdash a \vee b$ to $\vdash b$.
+\end{itemize}
+
+\LeanCommand{tauto}
+
+\begin{itemize}
+    \item \tauto concludes the proof by automatically establishing logical statements.
+\end{itemize}
+
+\LeanCommand[pushneg]{push\_neg}
+
+\begin{itemize}
+    \item \pushneg rewrites the goal by pushing negations deeper.
+    For example,
+    $\vdash \neg \forall x,\ \exists y,\ x \leq y$
+    transforms into
+    $\vdash \exists x,\ \forall y,\ y < x$.
+\end{itemize}
+
+\LeanCommand{contrapose}
+
+\begin{itemize}
+    \item \contrapose turns a goal $P \to Q$ into $\neg Q \to \neg P$
+    \item \contrapose $h$ changes the goal to $\neg h$ and replaces $h$ by the negation of the original goal
+\end{itemize}
+
+\LeanCommand[contraposel]{contrapose!}
+
+\begin{itemize}
+    \item \contraposel $h$ first does \contrapose and then applies \pushneg to both the goal and $h$
+\end{itemize}
+
+
+%---------------------------------%
+\subsection*{Contradiction tactics}
+%---------------------------------%
+
+\LeanCommand{exfalso}
+
+\begin{itemize}
+    \item \exfalso changes the goal to \False.
+    Use it to start a proof by contradiction.
+\end{itemize}
+
+\LeanCommand[bycontra]{by\_contra}
+
+\begin{itemize}
+    \item \texttt{\bycontra $h$} replaces the goal $g$ with $\False$ and introduces a new hypothesis $h : \neg g$.
+    It can be used to prove the goal by contradiction.
+\end{itemize}
+
+\LeanCommand[bycontral]{by\_contra!}
+
+\begin{itemize}
+    \item \texttt{\bycontral} is the same as \texttt{\bycontra} except that it also automatically normalizes negations by using \pushneg.
+\end{itemize}
+
+\LeanCommand{contradiction}
+
+\begin{itemize}
+    \item \contradiction closes the goal if its hypotheses are ``trivially contradictory''. For example, if there is a hypothesis \texttt{$h:$ False}, or two contradictory hypotheses $h : P$ and $h' : \neg P$, or a decideably false hypothesis such as \texttt{$h:$ 2 + 2 = 3}.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Sets and functions}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection*{Notation}
+
+\vspace{10pt}
+
+\begin{tabular}{lcl}
+    Element & $\in$ & \verb|\in| \\
+    Not element & $\notin$ & \verb|\notin| \\
+    Subset & $\subseteq$ & \verb|\ss|, \verb|\sub|, \verb|\subset| \\
+    Intersection & $\cap$ & \verb|\i|, \verb|\inter|, \verb|\cap| \\
+    Union & $\cup$ & \verb|\union|, \verb|\un|, \verb|\cup| \\
+    Set difference & $\backslash$ & \verb|\\| \\
+    Empty set & $\varnothing$ & \verb|\emptyset|, \verb|\empty|, \verb|\varnothing|
+\end{tabular}
+
+\vspace{10pt}
+
+Some further notation and conventions:
+\begin{itemize}
+    \item Universal set: \verb|Set.univ| is the set of all elements of a given type
+    \item \texttt{\{$y$ | $P\ y$\}} unfolds to \texttt{(fun $y$ $\mapsto$ $P$ $y$)}, so \texttt{$x \in$ \{$y$ | $P\ y$\}} reduces to $P\ x$.
+    \item The preimage \texttt{$f$ ⁻¹' $s$} is defined as \texttt{\{$x$ | $f\ x\ \in\ s$\}}, so \texttt{$x$ $\in$ $f$ ⁻¹' $s$} reduces to $f\ x \in s$.
+    \item \texttt{Injective $f$} is defined as $\forall\ x_1\ x_2,\ f\ x_1\ =\ f\ x_2\ \to\ x_1\ =\ x_2$.
+\end{itemize}
+
+% \begin{itemize}
+%     \item Element: $\in$ is \verb|\in|
+%     \item Not element: $\notin$ as \verb|\notin|
+%     \item Subset: $\subseteq$ is \verb|\ss|, \verb|\sub| or \verb|\subset|
+%     \item Intersection: $\cap$ is \verb|\i|, \verb|\inter|, \verb|\cap|
+%     \item Union: $\cup$ is \verb|\union|, \verb|\un| or \verb|\cup|
+%     \item Set difference: $\backslash$ is \verb|\\|
+%     \item Empty set: $\varnothing$ using \verb|\emptyset|, \verb|\empty| or \verb|\varnothing|
+%     \item Universal set: \verb|Set.univ| is the set of all elements of a given type
+%     \item \texttt{\{$y$ | $P\ y$\}} unfolds to \texttt{(fun $y$ $\mapsto$ $P$ $y$)}, so \texttt{$x \in$ \{$y$ | $P\ y$\}} reduces to $P\ x$.
+%     \item The preimage \texttt{$f$ ⁻¹' $s$} is defined as \texttt{\{$x$ | $f\ x\ \in\ s$\}}, so \texttt{$x$ $\in$ $f$ ⁻¹' $s$} reduces to $f\ x \in s$.
+%     \item \texttt{Injective $f$} is defined as $\forall\ x_1\ x_2,\ f\ x_1\ =\ f\ x_2\ \to\ x_1\ =\ x_2$.
+% \end{itemize}
+
+We write $P\ a$ to mean that proposition $P$ holds for $a : \alpha$, so under the hood a property or predicate on a type $\alpha$ is just a function \texttt{$P$\ :\ $\alpha \to$ Prop}.
+In \emph{Mathlib}, \texttt{Set $\alpha$} is defined to be \texttt{$\alpha$ $\to$ Prop} and $x \in S$ is defined to be $S\ x$.
+
+Set-builder notation is used to define
+\begin{itemize}
+    \item $s \cap t$ as \texttt{\{$x$ | $x \in s$ $\wedge$ $x \in t$\}},
+    \item $s \cup t$ as \texttt{\{$x$ | $x \in s$ $\vee$ $x \in t$\}},
+    \item $\varnothing$ as \texttt{\{$x$ | False\}},
+    \item \texttt{univ} as \texttt{\{$x$ | True\}}.
+\end{itemize}
+
+\subsection*{Tactics}
+
+\LeanCommand[tautoset]{tauto\_set}
+
+\begin{itemize}
+    \item Proves any relation between sets by first reformulating it as a logical statement and then applying \tauto.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%
+\section{Core tactics}
+%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection*{Tactics}
+
+\LeanCommand{intro}
+
+\begin{itemize}
+    \item If the goal is $\vdash A \to B$ then \texttt{\intro $h$} replaces it with $\vdash B$ and introduces a new hypothesis $h:A$. Omitting $h$ or replacing it by \verb|_| leaves the hypothesis unnamed.
+    \item If the goal is $\vdash A \to B \to C$ then \texttt{\intro $ha$ $hb$} replaces it with $C$ and introduces two new hypotheses, $ha:A$ and $hb:B$.
+    \item If the goal is $\vdash \neg A$ then \texttt{\intro $h$} replaces it with $\vdash \False$ and introduces a hypothesis $h:A$.
+    \item If the goal is $\vdash A \wedge B \to C$ then \texttt{\intro $\langle ha, hb \rangle$} introduces hypotheses $ha:A$ and $hb:B$, and replaces the goal with $C$.
+    \item If the goal is $\vdash \forall (a:\N), a + a = 2 * a$ then \texttt{\intro $x$} introduces a hypothesis $x:\N$ and changes the goal to $\vdash x+x = 2*x$.
+\end{itemize}
+
+\LeanCommand{revert}
+
+\begin{itemize}
+    \item \texttt{\revert $x$} is the inverse of \texttt{\intro $x$}.
+\end{itemize}
+
+\LeanCommand{exact}
+
+\begin{itemize}
+    \item \texttt{\exact $h$} concludes the proof if the goal is $\vdash A$ and there is a hypothesis $h:A$.
+    \item \texttt{\exact $\langle hp, hq \rangle$} closes the goal $\vdash P \wedge Q$ using hypotheses $hp:P$ and $hq:Q$.
+    \item \texttt{\exact $h1$ $h2$} is a shorthand for \texttt{\apply $h1$; \exact $h2$}.
+    \item \texttt{\exact $h$ $a$} closes the goal by using hypothesis $h : (\forall y : Y), P(y)$ with $y = a$.
+    It seems that \texttt{\apply $h$} has the same effect.
+    \item \texttt{\exact?} performs library search.
+\end{itemize}
+
+\LeanCommand{assumption}
+
+\begin{itemize}
+    \item \assumption closes the goal if there is a matching hypothesis.
+\end{itemize}
+
+\LeanCommand{refine}
+
+\begin{itemize}
+    \item \texttt{\refine ⟨?\_, $h$, ?\_⟩} uses hypothesis $h : Q$ to replace the goal $\vdash P \wedge Q \wedge R$ with two new goals: $\vdash P$ and $\vdash R$.
+    \item \texttt{\refine $h$ ?\_} is equivalent to \texttt{\apply $h$} since it uses hypothesis \texttt{$h : P \to Q$} to change the goal from $\vdash Q$ to $\vdash P$.
+    \item \texttt{\refine ⟨$2$, ?\_⟩} is equivalent to \texttt{use $2$} since it changes an existential goal \texttt{$\vdash \exists$ ($n : \N$), $n^4 = 16$} to \texttt{$\vdash 2^4 = 16$}.
+    \item The cases can be given names:
+    \texttt{\refine $h$ ?$a$ ?$b$ ; case $a$ => \dots ; case $b$ => \dots}.
+\end{itemize}
+
+\paragraph{refine'}
+
+\CreateTitle{apply}
+
+\begin{itemize}
+    \item If the goal is $\vdash B$ and $h: A \to B$ is a hypothesis, then \texttt{\apply $h$} replaces the goal by $\vdash A$. This is \emph{backwards reasoning} from the goal.
+    \item If $h1: A \to B$ and $h2:A$ are hypotheses then \texttt{\apply $h1$ at $h2$} transforms the second hypothesis into $h2:B$. This is \emph{forwards reasoning}.
+    \item If $h: A \to B \to C$ is a hypothesis and the goal is $\vdash C$ then \texttt{\apply $h$} creates two cases with goals $\vdash A$ and $\vdash B$. Use \verb|\.| to address the two cases. Can use \texttt{<;>} if both cases can be address in the same way.
+    \item If $h: \neg P$ is a hypothesis and the goal is $\vdash \False$ then \texttt{\apply $h$} changes the goal to $P$ since $\neg P$ is definitionally equivalent to $P \to \False$.
+    \item If $h : \forall a, \varphi a = \psi a$ is a hypothesis and the goal is $\vdash \varphi x = \psi x$ then \texttt{\apply $h$} will conclude the proof.
+    \item \texttt{\apply $h$ at $h1$ $\vdash$} applies hypothesis $h$ at both $h1$ and the goal.
+    \item \texttt{\apply?} performs library search.
+\end{itemize}
+
+\LeanCommand{change}
+
+\begin{itemize}
+    \item \texttt{\change $g$} will change the current goal to $g$ if they are definitionally equivalent.
+    \item \texttt{\change $t'$ at $h$} will change the hypothesis $h:t$ to $h:t'$, assuming $t$ and $t'$ are definitionally equivalent.
+    \item \texttt{\change $a$ with $b$} will change occurances of $a$ with $b$ in the goal, assuming $a$ and $b$ are definitionally equivalent.
+    \item \texttt{\change $a$ with $b$ at $h$} does the same for hypothesis $h$.
+\end{itemize}
+
+\paragraph{show}
+
+\begin{itemize}
+    \item \texttt{show $g$} selects which of the goals to prove and unifies it with $g$.
+\end{itemize}
+
+\paragraph{rename\_i} ???????? rename inaccessible variable (one with dagger)
+
+\LeanCommand{clear}
+
+\begin{itemize}
+    \item \texttt{\clear $h$} removes the hypothesis $h$.
+\end{itemize}
+
+\LeanCommand{triv}
+
+\begin{itemize}
+    \item \texttt{\triv} concludes the proof if the goal is \True.
+\end{itemize}
+
+\LeanCommand{rfl}
+
+\begin{itemize}
+    \item \texttt{\rfl} tries to close the goal by using reflexivity, e.g., when the goal is $\vdash A \leftrightarrow B$.
+\end{itemize}
+
+\LeanCommand{rw}
+
+\begin{itemize}
+    \item \texttt{\rw [$h$]} rewrites the goal using hypothesis $h$.
+    \item \texttt{\rw [$\gets h$]} rewrites the goal using hypothesis $h$ in the backwards direction.
+    \item \texttt{\rw [$h$] at $h1$} rewrites the hypothesis $h1$.
+    \item \texttt{\rw?} searches for possible rewrites through the libarary.
+    \item \texttt{\rw?\ at $h$} does the same for hypothesis $h$.
+\end{itemize}
+
+\LeanCommand{erw}
+
+\begin{itemize}
+    \item Like \texttt{\rw} but tries a little harder.
+\end{itemize}
+
+\paragraph{nth\_rw}
+
+\begin{itemize}
+    \item \texttt{nth\_rw $i$ $j$ [$h$]} rewrites $i$-th to $j$-th occurances of hypothesis $h$.
+\end{itemize}
+
+\LeanCommand{rwa}
+
+\begin{itemize}
+    \item \rwa is the same as \rw but afterwards closes any remaining goals using \assumption.
+\end{itemize}
+
+\LeanCommand{unfold}
+
+\begin{itemize}
+    \item \texttt{\unfold $def$} unfolds the definition $def$ in the goal. Its action is similar to \texttt{\rw [$def$]}.
+    \item \texttt{\unfold?} followed by shift-clicking an expression in the tactic state gives a list of rewrite suggestions for the selected expression. Clicking on a suggestion replaces \texttt{\unfold?} by a tactic that performs this rewrite.
+\end{itemize}
+
+\paragraph{unfold\_let}
+
+\LeanCommand{use}
+
+\begin{itemize}
+    \item \texttt{\use $42$} chooses the variable under $\exists$ in the goal to have value $42$.
+    \item \texttt{\use $42, h1, h2$} chooses the value of the variable and uses hypotheses $h1$ and $h2$ to close the goal.
+    \item \texttt{\use $ha$} turns $ha : a, \ \vdash a \wedge b$ into $ha: a, \ \vdash b$.
+    \item \texttt{⟨$42, h1, h2$⟩} does the same but using Lean's ``anonymous constructor'' notation.
+    \item \texttt{example :$\;\exists x : \R, 41 < x \wedge x < 43 \; := \; $⟨$42$, by norm\_num⟩}.
+\end{itemize}
+
+\paragraph{delta}
+
+\LeanCommand{decide} ?????????? brute force trial for finite types
+
+\paragraph{fin\_cases} ????????? consider finite number of cases
+
+\LeanCommand{done}
+
+\begin{itemize}
+    \item \done succeeds if and only if there are no remaining goals.
+\end{itemize}
+
+\LeanCommand{sorry}
+
+\LeanCommand{admit}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Spliting into cases}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection*{Notation}
+
+\begin{itemize}
+    \item Tactic combinator: \texttt{<;>} applies the subsequent tactic to all subgoals generated by \texttt{cases}.
+    For example, \texttt{cases $h$; repeat \assumption} tries to close all cases by using existing hypotheses. This can be abbreviated as \texttt{cases $h$ <;> \assumption}.
+\end{itemize}
+
+\subsection*{Tactics}
+
+\paragraph{by\_cases}
+
+\begin{itemize}
+    \item \texttt{by\_cases $hP:P$} splits the main goal into two casses, assuming $hp:P$ in the first branch and $hp:\neg P$ in the second.
+\end{itemize}
+
+\paragraph{if \dots then \dots else \dots}
+
+\begin{itemize}
+    \item \texttt{if $h : t$ then $tac1$ else $tac2$} is equivalent to
+    \texttt{by\_cases $h : t$ $\cdot$ $tac1$ ; $\cdot$ $tac2$}.
+\end{itemize}
+
+\paragraph{cases'}
+
+\begin{itemize}
+    \item \texttt{cases' $h$ with $hp$ $hq$} breaks up the hypothesis
+    \begin{itemize}
+        \item $h: P \wedge Q$ into two new hypotheses: $hp:P$ and $hq:Q$,
+        \item $h: P \vee Q$ into two goals: one with hypothesis $hp:P$ and another with $hq:Q$.
+    \end{itemize}
+    \item \texttt{cases' $h$ with $z$ $hf$} replaces hypothesis $h: \exists x : X, P x$ with $hf: P z$ and introduces a new hypothesis $z : X$.
+    \item \texttt{cases' $h$ $z$ with $x$ $hx$} uses hypothesis $h: \forall b : Z, \exists a : X, f a = b$ to create two new hypotheses: $x : X$ and $hx : f x = z$.
+    \item If $n:\N$ then \texttt{cases' $n$ with $m$} gives two goals: one where $n$ is replaced by $0$ and another where it is replaced by \texttt{succ $m$}.
+\end{itemize}
+
+\paragraph{cases}
+
+\begin{itemize}
+    \item ...........
+\end{itemize}
+
+\LeanCommand{rcases}
+
+\begin{itemize}
+    \item \texttt{\rcases $h$ with ⟨$g$, ⟨$fg$, $gf$⟩⟩} breaks up hypothesis \texttt{$h : \exists g, f \circ g = id \wedge g \circ f = id$} into three hypotheses: $g : Y \to X$, $fg : f \circ g = id$, $gf : g \circ f = id$.
+    \item \texttt{\rcases $h$ with ⟨$a$, \rfl{}⟩} unpacks the hypothesis $h$ into $a$ and another unnamed hypothesis that is immediately used to rewrite the goal.
+    \item \texttt{\rcases h with hl | hr} breaks the hypothesis \texttt{h = (...)$\;\lor\;$(...)} into two cases called \texttt{hl} and \texttt{hr}.
+\end{itemize}
+
+\LeanCommand{rintro}
+
+\begin{itemize}
+    \item \rintro is a combination of \intro and \rcases.
+    \item \texttt{\rintro $hP$ ⟨$hQ$, $hR$⟩} is equivalent to \texttt{\intro $hP$} followed by \texttt{\intro $h$} and \texttt{cases' $h$ with $hQ$ $hR$}.
+    \item \texttt{\rintro $x$ $y$ $h$} replaces goal \texttt{$\vdash \forall (x \; y : \R), x = y \to y = x$} by $\vdash y = x$ and introduces hypotheses $x \; y : \R$ and $h : x = y$.
+    \item \texttt{\rintro $x$ $y$ \rfl} is equivalent to \texttt{\rintro $x$ $y$ $h$; subst $h$}, which speeds up the previous example by immediately changing the goal to $\vdash x = x$ with hypothesis $x : \R$.
+\end{itemize}
+
+\paragraph{by\_cases}
+
+\begin{itemize}
+    \item \texttt{by\_cases $h : P$} splits the goal into two cases, assuming $h : P$ in the first branch and $h : \neg P$ in the second.
+\end{itemize}
+
+\paragraph{left / right}
+
+\begin{itemize}
+    \item If the goal is $A \wedge B$ then \texttt{left} introduces a hypothesis $A$
+\end{itemize}
+
+\paragraph{interval\_cases}
+
+\begin{itemize}
+    \item \texttt{interval\_cases $n$} searches for upper and lower bounds on a variable $n$, and if bounds are found, splits into separate cases for each possible value of $n$.
+\end{itemize}
+
+\LeanCommand{constructor}
+
+\begin{itemize}
+    \item \constructor breaks the goal $P \wedge Q$ into two cases: $P$ and $Q$.
+    Each of them can then be addressed using $\cdot$ (entered as \verb|\.|).
+    If both cases can be addressed the same way, use \texttt{\constructor <;>},
+    followed by $\cdot$ and commands that address both cases simultaneously.
+    \item \constructor breaks the goal $A \leftrightarrow B$ into two cases: $A \to B$ and $B \to A$.
+\end{itemize}
+
+
+%%%%%%%%%%%%%%%
+\section{Reals}
+%%%%%%%%%%%%%%%
+
+\subsection*{Notation}
+
+\begin{itemize}
+    \item Reals: $\R$ is \verb|\R|
+\end{itemize}
+
+\subsection*{Tactics}
+
+\paragraph{norm\_num}
+
+\begin{itemize}
+    \item \texttt{norm\_num} normalizes the numerical expression in the goal.
+\end{itemize}
+
+\LeanCommand{subst}
+
+\begin{itemize}
+    \item \texttt{\subst $h$} removes hypothesis $h : x = y$ and replaces all occurances of $y$ by $x$ throughout.
+    \item \texttt{\subst $y$} has the same effect, while \texttt{\subst $x$} substitutes all occurances of $x$ by $y$.
+    \item \texttt{\subst $h1$ $h2$} makes two substitutions simultaneously based on hypotheses $h1$ and $h2$.
+\end{itemize}
+
+\paragraph{subst\_vars}
+
+\begin{itemize}
+    \item \texttt{subst\_vars} performs all possible substitutions with \texttt{subst}.
+\end{itemize}
+
+\LeanCommand{specialize}
+
+\begin{itemize}
+    \item \texttt{\specialize $h$ $42$} replaces the variable under $\forall$ in hypothesis $h$ with the value $42$.
+\end{itemize}
+
+\LeanCommand{generalize} ?????????? look for an expression and replace it by a variable
+
+\paragraph{clean\_value} ??????????
+
+
+%%%%%%%%%%%%%%%%%%%
+\section{Functions}
+%%%%%%%%%%%%%%%%%%%
+
+\subsection*{Notation}
+
+\begin{itemize}
+    \item Function composition: $\circ$ is \verb|\o|
+    \item Map: $\mapsto$ is \verb|\mapsto|
+    \item Identity function: \verb|id| (\texttt{id $x$} is definitionally equal to $x$)
+    \item Subscripts: $x_1$ is \verb|x\1| or \verb|x\_1|
+    \item Equivalence: $\simeq$ is \verb|\equiv| or \verb|\simeq|
+\end{itemize}
+
+\subsection*{Conventions}
+
+\begin{itemize}
+    \item $X \simeq Y$ is the type of functions from $X$ to $Y$ with a two-sided inverse.
+\end{itemize}
+
+\subsection*{Commands}
+
+\LeanCommand{fun}
+
+\begin{itemize}
+    \item \texttt{\fun $x$ $y$ => $x$ + $y$} creates an anonymous fuction (lambda expression).
+    \item $\lambda$ is a shorthand for \fun.
+\end{itemize}
+
+\paragraph{def}
+
+\begin{itemize}
+    \item \texttt{def $f : \N \to \R$ := \fun $n \mapsto n^2 + 3$} defines a function.
+\end{itemize}
+
+\subsection*{Tactics}
+
+\paragraph{apply\_fun}
+
+\begin{itemize}
+    \item \texttt{apply\_fun $f$} turns goal $\vdash x = y$ into $\vdash f(x) = f(y)$.
+    \item \texttt{apply\_fun $f$ at $h$} turns hypothesis $h : x = y$ into $h : f(x) = f(y)$.
+\end{itemize}
+
+\paragraph{choose}
+
+\begin{itemize}
+    \item \texttt{choose $g$ $hg$ using $sur$} creates a new hypothesis $hg : \forall (y : Y), f(g \ y) = y$ which asserts that $g : Y \to X$ is a one-sided inverse of function $f : X \to Y$ whose surjectivity is guaranteed by hypothesis \texttt{$sur$ : Function.Surjective $f$}.
+\end{itemize}
+
+\LeanCommand{ext}
+
+\begin{itemize}
+    \item \texttt{\ext $x$} changes the goal from $f = g$ to $f\ x = g\ x$ and introduces a new hypothesis $x : X$ where $X$ is the domain of both functions $f$ and $g$.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Creating new hypotheses}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\LeanCommand{have}
+
+\begin{itemize}
+    \item \texttt{\have $h1$ := $h$} creates a copy of hypothesis $h$ called $h1$.
+    \item \texttt{\have $h$:<statement> := by <proof>} introduces a new hypothesis $h$ defined as \texttt{<statement>} and justified by \texttt{<proof>}.
+\end{itemize}
+
+\LeanCommand{suffices} ????????? similar to have
+
+\LeanCommand{obtain}
+
+\begin{itemize}
+    \item \obtain is a combination of \have and \rcases.
+    \item \texttt{\obtain ⟨patt⟩ : type := proof} is equivalent to
+    \texttt{\have $h$ : type := proof; \rcases $h$ with patt}.
+    \item \texttt{\obtain ⟨$hP$, $hQ$⟩ := $P \wedge Q$} creates two new hypotheses, $hP : P$ and $hQ : Q$.
+\end{itemize}
+
+\paragraph{let}
+
+\paragraph{set}
+
+\begin{itemize}
+    \item \texttt{set $a$ := $t$ with $h$} is a variant of \texttt{let $a$ := $t$}. It adds the hypothesis \texttt{$h : a = t$} to the local context and replaces $t$ with $a$ everywhere it can.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Structures}
+%%%%%%%%%%%%%%%%%%%%
+
+%-----------------%
+\subsection{Groups}
+%-----------------%
+
+\subsection*{Notation}
+
+\begin{itemize}
+    \item Inverse: $^{-1}$ is \verb|\-| or \verb|\inv|
+    \item Quotient: $/$ is \verb|\quot| or \verb|\/| (not the same as the ``/'' character)
+    \item Group isomorphisms: $\simeq*$ where $\simeq$ is \verb|\simeq| or \verb|\equiv| (short for \texttt{MulEquiv})
+    \item Ring isomorphisms: $\simeq+*$ (short for \texttt{RingEquiv})
+\end{itemize}
+
+\subsection*{Conventions}
+
+\begin{itemize}
+    \item \texttt{$a$ * $b$ * $c$} means \texttt{($a$ * $b$) * $c$}
+\end{itemize}
+
+\subsection*{Tactics}
+
+\LeanCommand{group}
+
+\begin{itemize}
+    \item Automatically proves any group identity that does not require the hypotheses.
+\end{itemize}
+
+\LeanCommand{abel}
+
+\begin{itemize}
+    \item Similar but for abelian groups.
+\end{itemize}
+
+%-------------------%
+\subsection{Lattices}
+%-------------------%
+
+\subsection*{Notation}
+
+\begin{itemize}
+    \item Less than or equal: $\le$ is \verb|\le|
+    \item Greater than or equal: $\ge$ is \verb|\ge|
+    \item Greatest lower bound, infimum, or meet: $\sqcap$ is \verb|\inf|, \verb|\meet|, \verb|\glb|, or \verb|\sqcap|
+    \item Least upper bound, supremum, or join: $\sqcup$ is \verb|\sup|, \verb|\join|, \verb|\lub|, or \verb|\sqcup|
+    \item The bottom element: $\bot$ is \verb|\bot|
+    \item The top element: $\top$ is \verb|\top|
+\end{itemize}
+
+%-------------------------%
+\subsection{Linear algebra}
+%-------------------------%
+
+\subsection*{Notation}
+
+\newcommand{\dv}{$\cdot_\mathtt{v}$}
+\newcommand{\ov}{*$_\mathtt{v}$}
+\newcommand{\vo}{$_\mathtt{v}$*}
+\newcommand{\tp}{$^\mathtt{T}$}
+
+\begin{itemize}
+    \item Linear maps: \texttt{$V$ $_{\to l}[k]$ $W$} where $_{\to l}$ is \verb|\tol|, \verb|\rl|, \verb|\to_l|, \verb|\r_l|, or \verb|\linearmap|
+    \item Vector (neither row nor column): \texttt{![1, 2, 3]}
+    \item Vector dot product: \texttt{![1, 2] \dv{} ![3, 4]} where $_\mathtt{v}$ is \verb|\_v|
+    \item Matrix: \texttt{!![1, 2; 3, 4]}
+    \item Matrix multiplication: \texttt{!![1, 2; 3, 4] * !![3, 4; 5, 6]}
+    \item Matrix-vector multiplication: \texttt{!![1, 2; 3, 4] \ov{} ![1, 1]}
+    \item Vector-matrix multiplication: \texttt{![1, 1] \vo{} !![1, 2; 3, 4]}
+    \item Transpose: \texttt{!![1, 2; 3, 4]\tp} where \tp{} is \verb|\^T|
+    \item Inverse: \texttt{!![1, 2; 3, 4]$^{-1}$} where $^{-1}$ is \verb|\-|, \verb|\inv|, \verb|\-1|, or \verb|\^-1|
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Tactic combinators}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\paragraph{;}
+
+\begin{itemize}
+    \item \texttt{$t_1$ ; $t_2$} means tactic $t_1$ followed by $t_2$.
+\end{itemize}
+
+\paragraph{\textless;\textgreater}
+
+\begin{itemize}
+    \item \texttt{cases <;> assumption} splits the proof into cases and uses \texttt{assumption} in each case.
+\end{itemize}
+
+\paragraph{$\blacktriangleright$}
+
+\begin{itemize}
+    \item $\blacktriangleright$ is entered as \verb|\t| or \verb|\blacktriangleright|.
+    \item Given $h : a = b$ and $e : p \; a$, the term $h \blacktriangleright e$ has type $p \; b$. You can also view $h \blacktriangleright e$ as a ``type casting'' operation where you change the type of $e$ by using $h$.
+    \item \texttt{%
+        example \{$f : \R \to \R$\} $(h :$ Surjective $f) : \exists x, f x ^ 2 = 4 :=$ \\
+        let ⟨$x, hx$⟩ $:= h \; 2$ \\
+        ⟨$x, hx \blacktriangleright$ by norm\_num⟩%
+    }
+\end{itemize}
+
+\paragraph{\textless\textbar}
+
+\paragraph{try}
+
+\begin{itemize}
+    \item \texttt{try assumption} tries to close the goal by using some hypothesis. If no hypothesis applies then no progress is made.
+\end{itemize}
+
+\paragraph{repeat}
+
+\begin{itemize}
+    \item \texttt{repeat $t$} keeps applying tactic $t$ until it fails.
+\end{itemize}
+
+\paragraph{repeat'}
+
+\begin{itemize}
+    \item Repeat the given tactic as many times as possible. Subgoals where it fails are left over.
+\end{itemize}
+
+\paragraph{all\_goals} ????????? do something for all goals
+
+\paragraph{any\_goals} ????????? do something to any goal it can be done to
+
+\paragraph{first}
+
+\begin{itemize}
+    \item \texttt{first | $t_1$ | $t_2$ | $\dots$ | $t_n$} tries each tactic $t_i$ in order until one of them succeeds, or else fails.
+\end{itemize}
+
+\paragraph{@}
+
+\begin{itemize}
+    \item \texttt{@x} disables automatic insertion of implicit parameters of the constant \texttt{x}. \texttt{@e} for any term \texttt{e} also disables the insertion of implicit lambdas at this position.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%
+\section{Arithmetic}
+%%%%%%%%%%%%%%%%%%%%
+
+\LeanCommand{ring}
+
+\begin{itemize}
+    \item \ring evaluates the goal expression in commutative (semi)ring.
+\end{itemize}
+
+\paragraph{ring\_nf}
+
+\begin{itemize}
+    \item \texttt{ring\_nf} rewrites the ring expression in the goal into a normal form.
+\end{itemize}
+
+\paragraph{noncomm\_ring}
+
+\begin{itemize}
+    \item Similar but for non-commutative rings.
+\end{itemize}
+
+\LeanCommand{linarith}
+
+\begin{itemize}
+    \item \linarith uses linear arithmetic to prove the goal.
+\end{itemize}
+
+\LeanCommand{nlinarith}
+
+\begin{itemize}
+    \item \nlinarith is extension of \linarith with some preprocessing to allow solving nonlinear arithmetic problems.
+\end{itemize}
+
+\paragraph{linear\_combination}
+
+\LeanCommand{polyrith}
+
+\begin{itemize}
+    \item \polyrith finds the right coefficients for \texttt{linear\_combination}.
+\end{itemize}
+
+\LeanCommand{calc}
+
+\begin{verbatim}
+example {a b : C} (h1 : a - 5 * b = 4) (h2 : b + 2 = 3) : a = 9 :=
+  calc
+    a = a - 5 * b + 5 * b := by ring
+    _ = 4 + 5 * b := by rw [h1]
+    _ = -6 + 5 * (b + 2) := by ring
+    _ = -6 + 5 * 3 := by rw [h2]
+    _ = 9 := by ring
+\end{verbatim}
+
+\paragraph{field\_simp}
+
+\begin{itemize}
+    \item Reduce an expression in a field to an expression of the form $n / d$ where neither $n$ nor $d$ contains any division symbol.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Simplification}
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\LeanCommand{dsimp}
+
+\begin{itemize}
+    \item \dsimp stands for ``definitional simplifier'' since it simplifies the goal using only theorems that hold by reflexivity.
+    For example, it can be used to substitute arguments into a function: \texttt{(\fun $n \mapsto n^2 + 3$) $37$} simplifies into $37^2+3$.
+    \item \texttt{\dsimp only [...]} simplifies using only the given set of rules.
+    \item \texttt{\dsimp only} is equivalent to \texttt{\dsimp only []}, meaning that it does not use any additional rules for simplification.
+\end{itemize}
+
+\LeanCommand{simp}
+
+\begin{itemize}
+    \item \texttt{simp} simplifies the goal using lemmas (tagged with \texttt{[simp]}) and hypotheses.
+    \item \texttt{simp at $h$} simplifies the hypothesis $h$.
+    \item \texttt{simp only [...]} simplifies using only the given set of rules.
+\end{itemize}
+
+\paragraph{simp\_all}
+
+\LeanCommand{simpa}
+
+\begin{itemize}
+    \item \texttt{\simpa [rules, \dots] using e}
+    \item \texttt{\simpa [rules, \dots]}
+    \item \texttt{[\ldots] asdf}
+\end{itemize}
+
+\paragraph{simp\_rw}
+
+\LeanCommand{aesop}
+
+%%%%%%%%%%%%%%%
+\section{Other}
+%%%%%%%%%%%%%%%
+
+\paragraph{congr}
+
+\LeanCommand{trans}
+
+\begin{itemize}
+    \item \texttt{\trans $y$} changes the goal from $x \leq z$ to two new goals: $x \leq y$ and $y \leq z$. It can be used whenever the goal contains a transitive relation.
+\end{itemize}
+
+Tactics for general-purpose or domain-specific automation:
+\begin{itemize}
+    \item \texttt{suggest} searches the library for an applicable lemma.
+    \item \simp is a general-purpose simplifier.
+    \item \abel, \ring, \linarith, \texttt{omega}, continuity: domain-specific automation.
+    \item \texttt{tidy}, \texttt{finish}, \texttt{solve\_by\_elim}: general purpose automation.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%
+\section{Metacommands}
+%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{itemize}
+    \item \texttt{\#eval}
+    \item \texttt{\#check}
+    \item \texttt{\#print}
+    \item \texttt{\#print axioms theorem\_name} -- prints all the axioms used in the proof of \texttt{theorem\_name}
+    \item \texttt{\#reduce}
+    \item \texttt{\#synth}
+    \item \texttt{\#version} -- prints the Lean version
+\end{itemize}
+
+Search commands:
+\begin{itemize}
+    \item \texttt{\#leansearch}
+    \item \texttt{\#loogle}
+    \item \texttt{\#moogle}
+    \item \texttt{\#statesearch}
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Rules of thumb}
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection*{Goal}
+
+\begin{itemize}
+    \item $\vdash \exists\ a,\ \dots$ -- use \use
+    \item $\vdash \forall\ a,\ \dots$ -- use \intro
+    \item $\vdash a \to b$ -- use \intro
+    \item $\vdash a \leftrightarrow b$ -- use \constructor
+    \item $\vdash a \wedge b$ -- use \constructor
+    \item $\vdash a \vee b$ -- use \texttt{left} or \texttt{right}
+    \item $\vdash s \subseteq t$ -- \intro $x$ $xs$
+\end{itemize}
+
+\subsection*{Hypothesis}
+
+\begin{itemize}
+    \item \texttt{$h : x \in f$''$s$} -- use \texttt{\rcases $h$ with $\langle x,\ xs,\ fxeq \rangle$}
+\end{itemize}
+
+\subsection*{Table}
+
+\begin{tabular}{l|l|l}
+
+    $\vdash \exists\ x,\ f\ x$ &
+    \texttt{use} 42 &
+    $\vdash f\ 42$ \\
+
+    \hline
+
+    $\vdash \forall\ x,\ f\ x$ &
+    \intro x &
+    $x : \alpha$ \\
+    && $\vdash f\ x$ \\
+
+    \hline
+
+    $\vdash a \leftrightarrow b$ &
+    \constructor &
+       $\vdash a \to b$ \\
+    && $\vdash b \to a$ \\
+
+    \hline
+
+    $\vdash a \to b$ &
+    \intro $h$ &
+       $h : a$ \\
+    && $\vdash b$ \\
+
+    \hline
+
+    $\vdash a \wedge b$ &
+    \constructor &
+       $\vdash a$ \\
+    && $\vdash b$ \\
+    
+    \hline
+    
+    $\vdash a \vee b$
+    & \texttt{left} & $\vdash a$ \\
+    & \texttt{right} & $\vdash b$ \\
+
+    \hline
+
+    % $s\ t\ :\ \texttt{Set}\ \alpha$ &
+    $\vdash s \subseteq t$ &
+    \intro $x$ $xs$ &
+       $x : \alpha$ \\
+    && $xs : x \in s$ \\
+    && $\vdash x \in t$ \\
+
+    \hline
+
+    $\vdash s = t$ &
+    \ext $x$ &
+       $x : \alpha$ \\
+    && $\vdash x \in s\ \leftrightarrow\ x \in t$ \\
+
+    \hline
+    $\vdash x \in s \cup t \to p$ &
+    \texttt{\rintro ($xs$ | $xt$)} &
+    $xs : x \in s$ \\
+    && $\vdash p$ \\
+    && $xt : x \in t$ \\
+    && $\vdash p$ \\
+
+    \hline
+
+    \texttt{$\vdash y \in f$''$s$} &
+    \texttt{use $x$} &
+    $\vdash x \in s \wedge f\ x = y$ \\
+
+    \hline
+
+    \texttt{$\vdash y \in f$''$s\ →\ p$} &
+    \texttt{\rintro ⟨$x$, $xs$, $fx$⟩} &
+       $x : \alpha$ \\
+    && $xs : x \in s$ \\
+    && $fx : f\ x = y $ \\
+    && $\vdash p$ \\
+    \hline
+
+    \texttt{$h : y \in f$''$s$} &
+    \texttt{\rcases $h$ with ⟨$x$, $xs$, $fx$⟩} &
+       $x : \alpha$ \\
+    && $xs : x \in \alpha$ \\
+    && $fx : f\ x = y$ \\
+
+\end{tabular}
+
+
+\end{document}
