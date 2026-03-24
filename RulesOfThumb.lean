@@ -1,48 +1,62 @@
 import Mathlib
 import Mathlib.Data.Set.Defs
 
--- Existential quantifier in goal
+/-
+
+This Lean file illustrates various scenarious you might encounter during a proof and how to deal with them.
+
+-/
+
+variable (P : ℕ → Prop)
+
+-- Existential quantifier in the goal
+
 example : ∃ x, x = 1 := by
   use 1
 
-example (f : ℕ → Prop) : ∃ x, f x := by
+example : ∃ x, P x := by
   use 1
   sorry
 
--- Universal quantifier in goal
-example (f : ℕ → Prop) : ∀ x, f x := by
+-- Universal quantifier in the goal
+
+example : ∀ x, P x := by
   intro x
   sorry
 
--- Existential quantifier in hypothesis
-example (P : ℝ → Prop) (h : ∃ x : ℝ, P x) : True := by
+-- Existential quantifier in a hypothesis
+
+example (h : ∃ x : ℕ, P x) : True := by
   obtain ⟨x, hx⟩ := h
   sorry
 
-example (P : ℝ → Prop) (h : ∃ x : ℝ, P x) : True := by
+example (h : ∃ x : ℕ, P x) : True := by
   let ⟨x, hx⟩ := h
   sorry
 
-example (P : ℝ → Prop) (h : ∃ x : ℝ, P x) : True := by
+example (h : ∃ x : ℕ, P x) : True := by
   rcases h with ⟨x, hx⟩
   sorry
 
--- Universal quantifier in hypothesis
-example (P : ℝ → Prop) (h : ∀ x : ℝ, P x) : True := by
+-- Universal quantifier in a hypothesis
+
+example (h : ∀ x : ℕ, P x) : True := by
   specialize h 42
   sorry
 
-example (P : ℝ → Prop) (h : ∀ x : ℝ, P x) : True := by
+example (h : ∀ x : ℕ, P x) : True := by
   have ha := h 42
   sorry
 
--- Implication in goal
+-- Implication in the goal
+
 example (a b : Prop) : a → b := by
   intro h
   show b
   sorry
 
--- Equivalence in goal
+-- Equivalence in the goal
+
 example (a b : Prop) : a ↔ b := by
   constructor
   · show a → b
@@ -50,7 +64,8 @@ example (a b : Prop) : a ↔ b := by
   · show b → a
     sorry
 
--- Conjuction in goal
+-- Conjuction in the goal
+
 example (a b : Prop) : a ∧ b := by
   constructor
   · show a
@@ -58,45 +73,51 @@ example (a b : Prop) : a ∧ b := by
   · show b
     sorry
 
--- Conjuction in goal (use a hypothesis)
+-- Conjuction in the goal (use a hypothesis)
+
 example (a b : Prop) (ha : a) : a ∧ b := by
   use ha
   show b
   sorry
 
--- Disjunction in goal
+-- Disjunction in the goal
+
 example (a b : Prop) : a ∨ b := by
   left
   show a
   sorry
 
-example (α : Type) (s t : Set α) : s ⊆ t := by
+-- Various scenarious involving sets
+
+variable (α : Type)
+
+example (s t : Set α) : s ⊆ t := by
   intro x xs
   sorry
 
-example (α : Type) (s : Set α) (f : α → α) (y : α) (h : y ∈ f '' s) : y ∈ s := by
+example (s : Set α) (f : α → α) (y : α) (h : y ∈ f '' s) : y ∈ s := by
   rcases h with ⟨x, xs, fx⟩
   sorry
 
-example (α : Type) (s : Set α) (f : α → α) (y : α) (x : α) (fx : f x = y) (xs : x ∈ s) : y ∈ f '' s:= by
+example (s : Set α) (f : α → α) (y : α) (x : α) (fx : f x = y) (xs : x ∈ s) : y ∈ f '' s:= by
   use x
 
-example (α : Type) (s : Set α) (f : α → α) (y : α) (x : α) : y ∈ f '' s:= by
+example (s : Set α) (f : α → α) (y : α) (x : α) : y ∈ f '' s:= by
   use x
   sorry
 
-example (α : Type) (s : Set α) (f : α → α) (y : α) (p : Prop) : y ∈ f '' s → p:= by
+example (s : Set α) (f : α → α) (y : α) (p : Prop) : y ∈ f '' s → p:= by
   rintro ⟨x, xs, fx⟩
   sorry
 
-example (α : Type) (f : α → α) (h : ∀ a₁ a₂, f a₁ = f a₂ → a₁ = a₂) : f.Injective := by
+example (f : α → α) (h : ∀ a₁ a₂, f a₁ = f a₂ → a₁ = a₂) : f.Injective := by
   exact h
 
-example (α : Type) (s t : Set α) : s = t := by
+example (s t : Set α) : s = t := by
   ext x
   sorry
 
-example (α : Type) (x : α) (s t : Set α) (p : Prop): x ∈ s ∪ t → p := by
+example (x : α) (s t : Set α) (p : Prop): x ∈ s ∪ t → p := by
   rintro (xs | xt)
   · sorry
   · sorry
