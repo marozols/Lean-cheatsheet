@@ -486,7 +486,18 @@ Set-builder notation is used to define
 \CreateTitle[ccases]{cases}
 
 \begin{itemize}
-    \item ...........
+    \item \ccases is the structured version of \casesp that uses \texttt{\ccases $h$ with} followed by \texttt{| constructor\_name => tactic} branches.
+    \item \texttt{\ccases $h$ with | inl $hp$ => ... | inr $hq$ => ...} on $h : P \vee Q$ creates two goals:
+    \begin{itemize}
+        \item \texttt{| inl $hp$ =>} with hypothesis $hp : P$,
+        \item \texttt{| inr $hq$ =>} with hypothesis $hq : Q$.
+    \end{itemize}
+    \item \texttt{\ccases $n$ with | zero => ... | succ $m$ => ...} on $n : \N$ creates two goals:
+    \begin{itemize}
+        \item \texttt{| zero =>} where $n$ is replaced by $0$,
+        \item \texttt{| succ $m$ =>} where $n$ is replaced by \texttt{succ $m$}.
+    \end{itemize}
+    \item Unlike \casesp, the named branches can appear in any order, making proofs more robust to upstream changes.
 \end{itemize}
 
 \LeanCommand{rcases}
@@ -504,12 +515,6 @@ Set-builder notation is used to define
     \item \texttt{\rintro $hP$ ⟨$hQ$, $hR$⟩} is equivalent to \texttt{\intro $hP$} followed by \texttt{\intro $h$} and \texttt{\casesp $h$ with $hQ$ $hR$}.
     \item \texttt{\rintro $x$ $y$ $h$} replaces goal \texttt{$\vdash \forall (x \; y : \R), x = y \to y = x$} by $\vdash y = x$ and introduces hypotheses $x \; y : \R$ and $h : x = y$.
     \item \texttt{\rintro $x$ $y$ \rfl} is equivalent to \texttt{\rintro $x$ $y$ $h$; subst $h$}, which speeds up the previous example by immediately changing the goal to $\vdash x = x$ with hypothesis $x : \R$.
-\end{itemize}
-
-\paragraph{left / right}
-
-\begin{itemize}
-    \item If the goal is $A \wedge B$ then \lleft introduces a hypothesis $A$
 \end{itemize}
 
 \LeanCommand[intervalcases]{interval\_cases}
