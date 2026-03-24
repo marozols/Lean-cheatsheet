@@ -650,6 +650,7 @@ Set-builder notation is used to define
     \item \obtain is a combination of \have and \rcases.
     \item \texttt{\obtain ⟨patt⟩ : type := proof} is equivalent to
     \texttt{\have $h$ : type := proof; \rcases $h$ with patt}.
+    \item \texttt{\obtain ⟨$w$, $hw$⟩ := $h$} destructs a hypothesis $h : \exists\ x,\ P\ x$ into a witness $x$ and proof $hx : P\ x$
     \item \texttt{\obtain ⟨$hP$, $hQ$⟩ := $P \wedge Q$} creates two new hypotheses, $hP : P$ and $hQ : Q$.
 \end{itemize}
 
@@ -784,9 +785,17 @@ Set-builder notation is used to define
     \item Repeat the given tactic as many times as possible. Subgoals where it fails are left over.
 \end{itemize}
 
-\paragraph{all\_goals} ????????? do something for all goals
+\LeanCommand[allgoals]{all\_goals}
 
-\paragraph{any\_goals} ????????? do something to any goal it can be done to
+\begin{itemize}
+    \item \allgoals \texttt{t} applies the tactic \texttt{t} to every goal, and succeeds if all applications succeed.
+\end{itemize}
+
+\LeanCommand[anygoals]{any\_goals}
+
+\begin{itemize}
+    \item \anygoals \texttt{t} applies the tactic \texttt{t} to every goal. If \texttt{t} fails on all of the goals, the entire tactic fails.
+\end{itemize}
 
 \paragraph{first}
 
